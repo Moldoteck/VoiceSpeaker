@@ -90,4 +90,17 @@ export function setupSpeaker(bot: typeof Telegraf) {
       return
     }
   })
+  bot.command(['voice'], async (ctx) => {
+    if (ctx.message.reply_to_message) {
+      let all_messages = ctx.message.reply_to_message.text
+      // ctx.reply(messages.join('.\n'), { reply_to_message_id: ctx.message.message_id })
+      let audio = await toVoice(all_messages)
+      ctx.replyWithAudio({ source: audio }, { reply_to_message_id: ctx.message.message_id })
+      // ctx.deleteMessage(ctx.message.message_id)
+    }
+    else {
+      ctx.reply("this command sould be used as reply", { reply_to_message_id: ctx.message.message_id })
+      return
+    }
+  })
 }
