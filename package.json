@@ -1,10 +1,10 @@
 {
-  "name": "telegraf-template",
+  "name": "voice-speaker",
   "version": "1.0.0",
-  "description": "Telegram bot template based on telegraf.js.org",
+  "description": "Telegram bot which transforms chat conversation in audio files",
   "main": "dist/app.js",
-  "repository": "https://github.com/backmeupplz/telegraf-template",
-  "author": "backmeupplz <backmeupplz@gmail.com>",
+  "repository": "https://github.com/Moldoteck/VoiceSpeaker",
+  "author": "Moldoteck <moldotecko@gmail.com>",
   "license": "MIT",
   "private": false,
   "scripts": {
@@ -25,9 +25,10 @@
     "dotenv": "^8.2.0",
     "module-alias": "^2.2.2",
     "mongoose": "5.10.18",
-    "telegraf": "^3.38.0",
-    "telegraf-i18n": "^6.6.0",
-    "typescript": "^4.2.3"
+    "telegraf": "4.3.0",
+    "telegraf-i18n": "6.6.0",
+    "typescript": "^4.2.3",
+    "@google-cloud/text-to-speech": "3.1.3"
   },
   "_moduleAliases": {
     "@": "dist"
