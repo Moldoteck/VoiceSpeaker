@@ -82,7 +82,7 @@ export function setupSpeaker(bot: typeof Telegraf) {
       let all_messages = messages.join('.\n') + '.'
       // ctx.reply(messages.join('.\n'), { reply_to_message_id: ctx.message.message_id })
       let audio = await toVoice(all_messages)
-      ctx.replyWithAudio({ source: audio }, { reply_to_message_id: ctx.message.message_id })
+      ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
       // ctx.deleteMessage(ctx.message.message_id)
     }
     else {
