@@ -34,7 +34,7 @@ export function setupSpeaker(bot: typeof Telegraf) {
       return
     }
   })
-  //TODO: should skip id's related to this bot and messages from other bots
+  //TODO: should skip id's related to this bot
   //TODO: treat case when there are no messages
   bot.command(['ve'], async (ctx) => {
     if (ctx.message.reply_to_message) {
