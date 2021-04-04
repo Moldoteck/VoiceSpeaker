@@ -1,5 +1,5 @@
 name: English
 help: |
-  <b>Bot</b> can transform a conversation into audio message<br>Reply with /vs to first message for needed interval<br>Reply with /ve to the last message for needed interval
+  <b>Bot</b> can transform a conversation into audio message. Reply with /vs to first message for needed interval. Reply with /ve to the last message for needed interval
 language: Please, select the language.
 language_selected: <b>Bot</b> now speaks English.
