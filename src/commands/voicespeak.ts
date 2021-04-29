@@ -27,7 +27,7 @@ export async function toVoice(text: string, language = 'ru-RU', gender = 'NEUTRA
   const request = {
     input: { ssml: `<speak>${text}<break time=\"${pause}s\"/></speak>` },
     voice: { languageCode: language, ssmlGender: gender },
-    audioConfig: { audioEncoding: 'MP3' },
+    audioConfig: { audioEncoding: 'OGG' },
   };
 
   let [response] = await client.synthesizeSpeech(request)
