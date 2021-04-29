@@ -12,7 +12,7 @@ export async function toVoice(text: string) {
   const request = {
     input: { text: text },
     // Select the language and SSML voice gender (optional)
-    voice: { languageCode: 'ru-RU', name: 'ru-RU-Wavenet-C' },
+    voice: { languageCode: 'ru-RU', ssmlGender: 'NEUTRAL' },
     // select the type of audio encoding
     audioConfig: { audioEncoding: 'MP3' },
   };
