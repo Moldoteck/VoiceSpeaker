@@ -5,26 +5,58 @@ const tokenPath = './google_api.json';
 process.env.GOOGLE_APPLICATION_CREDENTIALS = tokenPath;
 const fs = require('fs');
 const util = require('util');
+var streams = require('memory-streams');
 
-export async function toVoice(text: string) {
-  // Creates a client
+function mergeAudios(audios) {
+  var reader = new streams.ReadableStream();
+  var writer = new streams.WritableStream();
+  audios.forEach(element => {
+    writer.write(element)
+  });
+  reader.append(writer.toBuffer())
+  return reader
+}
+
+export async function toVoice(text: string, language = 'ru-RU', gender = 'NEUTRAL', pause = 0) {
   const client = new textToSpeech.TextToSpeechClient();
   const request = {
-    input: { text: text },
-    // Select the language and SSML voice gender (optional)
-    voice: { languageCode: 'ru-RU', ssmlGender: 'NEUTRAL' },
-    // select the type of audio encoding
+    input: { ssml: `<speak>${text}<break time=\"${pause}s\"/></speak>` },
+    voice: { languageCode: language, ssmlGender: gender },
     audioConfig: { audioEncoding: 'MP3' },
   };
 
-  // Performs the text-to-speech request
-  const [response] = await client.synthesizeSpeech(request);
+  let [response] = await client.synthesizeSpeech(request)
+
   return response.audioContent
 }
 
 function isRussian(value: string) {
   const cyrillicPattern = /^\p{Script=Cyrillic}+$/u;
   return cyrillicPattern.test(value)
+}
+
+async function voicify(messages) {
+  let all_audios = []
+  let voice_types = ['MALE', 'FEMALE']
+  let voice_index = 0
+
+  let i = 0
+  for (i = 0; i < messages.length; ++i) {
+    let element = messages[i]
+    if (true) {
+      // if (isRussian(element[0])) {
+      let mssg = await toVoice(element.join(''), 'ru-RU', voice_types[voice_index])
+      all_audios.push(mssg)
+    }
+    else {
+      let mssg1 = await toVoice(element[0], 'en-US', voice_types[voice_index])
+      let mssg2 = await toVoice(element[1], 'ru-RU', voice_types[voice_index])
+      all_audios.push(mssg1)
+      all_audios.push(mssg2)
+    }
+    voice_index = voice_index == 0 ? 1 : 0
+  }
+  return all_audios
 }
 
 export function setupSpeaker(bot: Telegraf<Context>) {
@@ -39,7 +71,6 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       return
     }
   })
-  //TODO: should skip id's related to this bot
   //TODO: treat case when there are no messages
   bot.command(['ve'], async (ctx) => {
     if (ctx.message.reply_to_message) {
@@ -58,18 +89,18 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       let i = 0
       let real_messages = 0
       let messages = []
-      console.log(start, end)
+
       let prev_id = 0
       for (i = start; i <= end; ++i) {
         try {
           let msg = await ctx.telegram.forwardMessage(-586743279, ctx.message.chat.id, i, { disable_notification: true })
 
           if ('forward_from' in msg) {
-            if (('text' in msg) && !msg.forward_from.is_bot) {
-              console.log(msg.text)
+            if (('text' in msg) && (msg.text[0] != '/') && !msg.forward_from.is_bot) {
               let user_name = ''
               if (msg.forward_from.first_name || msg.forward_from.last_name) {
                 user_name = msg.forward_from.first_name + msg.forward_from.last_name
+                // user_name = msg.forward_from.username
               }
               else {
                 user_name = msg.forward_from.username
@@ -77,15 +108,25 @@ export function setupSpeaker(bot: Telegraf<Context>) {
               real_messages += 1
 
               if (msg.forward_from.id == prev_id) {
-                messages[messages.length - 1] += '. ' + msg.text
+                let pause = 0.6
+                messages[messages.length - 1][1] += `.<break time=\"${pause}s\"/> ` + msg.text
               }
-              else{
-                messages.push('От ' + user_name + ': ' + msg.text)
+              else {
+                messages.push([user_name, ' сказал: ' + msg.text])
               }
               prev_id = msg.forward_from.id
             }
           }
-          else {
+          else if ('forward_sender_name' in msg) {
+            if (('text' in msg) && (msg.text[0] != '/')) {
+              let user_name = ''
+              if (msg.forward_sender_name) {
+                user_name = msg.forward_sender_name
+              }
+              real_messages += 1
+              messages.push([user_name, ' сказал: ' + msg.text])
+              prev_id = -1
+            }
             replyMethodDeprecated()
           }
 
@@ -95,13 +136,13 @@ export function setupSpeaker(bot: Telegraf<Context>) {
           }
 
         } catch (err) {
-          console.log(err)
+          console.log(err.response)
         }
       }
-      let all_messages = messages.join('.\n') + '.'
-      let audio = await toVoice(all_messages)
+      let all_audios = await voicify(messages)
+      let audio = mergeAudios(all_audios)
+
       ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
-      // ctx.telegram.sendVoice(-586743279, { source: audio })
       // ctx.deleteMessage(ctx.message.message_id)
     }
     else {
@@ -123,14 +164,12 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       else {
         user_name = ctx.message.reply_to_message.from.username
       }
-      all_messages = 'От ' + user_name + ': ' + all_messages
-      // ctx.reply(messages.join('.\n'), { reply_to_message_id: ctx.message.message_id })
-      let audio = await toVoice(all_messages)
+      // user_name = ctx.message.reply_to_message.forward_sender_name
+      all_messages = user_name + ' сказал: ' + all_messages
+
+      let audio = await toVoice(all_messages, 'ru-RU', 'MALE')
       ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
       // ctx.deleteMessage(ctx.message.message_id)
-
-      // ctx.message.forward_sender_name
-
     }
     else {
       ctx.reply("this command sould be used as reply", { reply_to_message_id: ctx.message.message_id })

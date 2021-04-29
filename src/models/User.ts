@@ -52,7 +52,7 @@ export async function getStart(id: number) {
 
 export async function deleteInterval(id: number) {
   let user = await UserModel.findOne({ id })
-  if (!user) {
+  if (user) {
     user.start_msg = -1
     await UserModel.updateOne({ id }, user)
   }
