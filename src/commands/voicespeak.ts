@@ -22,11 +22,16 @@ export async function toVoice(text: string) {
   return response.audioContent
 }
 
+function isRussian(value: string) {
+  const cyrillicPattern = /^\p{Script=Cyrillic}+$/u;
+  return cyrillicPattern.test(value)
+}
+
 export function setupSpeaker(bot: Telegraf<Context>) {
   bot.command(['vs'], async (ctx) => {
     if (ctx.message.reply_to_message) {
       await setStart(ctx.from.id, ctx.message.reply_to_message.message_id)
-      ctx.reply("Ok, this is the start", { reply_to_message_id: ctx.message.message_id })
+      // ctx.reply("Ok, this is the start", { reply_to_message_id: ctx.message.message_id })
       // ctx.deleteMessage(ctx.message.message_id)
     }
     else {
@@ -54,38 +59,49 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       let real_messages = 0
       let messages = []
       console.log(start, end)
+      let prev_id = 0
       for (i = start; i <= end; ++i) {
         try {
-          let m = await ctx.reply(".", { reply_to_message_id: i })
-          if ('text' in m.reply_to_message) {
-            if (!m.reply_to_message.from.is_bot) {
-              real_messages += 1
+          let msg = await ctx.telegram.forwardMessage(-586743279, ctx.message.chat.id, i, { disable_notification: true })
 
+          if ('forward_from' in msg) {
+            if (('text' in msg) && !msg.forward_from.is_bot) {
+              console.log(msg.text)
               let user_name = ''
-              // m.reply_to_message.from.
-              if (m.reply_to_message.from.first_name || m.reply_to_message.from.last_name) {
-                console.log(m.reply_to_message.from.first_name)
-                console.log(m.reply_to_message.from.last_name)
-                user_name = m.reply_to_message.from.first_name + m.reply_to_message.from.last_name
+              if (msg.forward_from.first_name || msg.forward_from.last_name) {
+                user_name = msg.forward_from.first_name + msg.forward_from.last_name
               }
               else {
-                user_name = m.reply_to_message.from.username
+                user_name = msg.forward_from.username
               }
-              messages.push('От ' + user_name + ': ' + m.reply_to_message.text)
+              real_messages += 1
+
+              if (msg.forward_from.id == prev_id) {
+                messages[messages.length - 1] += '. ' + msg.text
+              }
+              else{
+                messages.push('От ' + user_name + ': ' + msg.text)
+              }
+              prev_id = msg.forward_from.id
             }
           }
-          ctx.deleteMessage(m.message_id)
+          else {
+            replyMethodDeprecated()
+          }
+
+          ctx.telegram.deleteMessage(-586743279, msg.message_id)
           if (real_messages > max_msg) {
             break
           }
+
         } catch (err) {
           console.log(err)
         }
       }
       let all_messages = messages.join('.\n') + '.'
-      // ctx.reply(messages.join('.\n'), { reply_to_message_id: ctx.message.message_id })
       let audio = await toVoice(all_messages)
       ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
+      // ctx.telegram.sendVoice(-586743279, { source: audio })
       // ctx.deleteMessage(ctx.message.message_id)
     }
     else {
@@ -94,13 +110,14 @@ export function setupSpeaker(bot: Telegraf<Context>) {
     }
   })
   bot.command(['voice'], async (ctx) => {
+    console.log(ctx.message.chat.id)
     if (ctx.message.reply_to_message && 'text' in ctx.message.reply_to_message) {
       let all_messages = ctx.message.reply_to_message.text
-      
+
       let user_name = ''
       // m.reply_to_message.from.
       if (ctx.message.reply_to_message.from.first_name || ctx.message.reply_to_message.from.last_name) {
-       
+
         user_name = ctx.message.reply_to_message.from.first_name + ctx.message.reply_to_message.from.last_name
       }
       else {
@@ -111,10 +128,41 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       let audio = await toVoice(all_messages)
       ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
       // ctx.deleteMessage(ctx.message.message_id)
+
+      // ctx.message.forward_sender_name
+
     }
     else {
       ctx.reply("this command sould be used as reply", { reply_to_message_id: ctx.message.message_id })
       return
     }
   })
+}
+
+
+function replyMethodDeprecated() {
+  // else {
+  //   let m = await ctx.reply(".", { reply_to_message_id: i })
+  //   if ('text' in m.reply_to_message) {
+  //     if (!m.reply_to_message.from.is_bot) {
+  //       real_messages += 1
+
+  //       let user_name = ''
+  //       // m.reply_to_message.from.
+  //       if (m.reply_to_message.from.first_name || m.reply_to_message.from.last_name) {
+  //         console.log(m.reply_to_message.from.first_name)
+  //         console.log(m.reply_to_message.from.last_name)
+  //         user_name = m.reply_to_message.from.first_name + m.reply_to_message.from.last_name
+  //       }
+  //       else {
+  //         user_name = m.reply_to_message.from.username
+  //       }
+  //       messages.push('От ' + user_name + ': ' + m.reply_to_message.text)
+  //     }
+  //   }
+  //   ctx.deleteMessage(m.message_id)
+  //   if (real_messages > max_msg) {
+  //     break
+  //   }
+  // }
 }
