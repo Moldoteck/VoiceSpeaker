@@ -11,7 +11,12 @@ function mergeAudios(audios) {
   var reader = new streams.ReadableStream();
   var writer = new streams.WritableStream();
   audios.forEach(element => {
-    writer.write(element)
+    if (element instanceof streams.ReadableStream) {
+      element.pipe(writer)
+    }
+    else {
+      writer.write(element)
+    }
   });
   reader.append(writer.toBuffer())
   return reader
@@ -98,9 +103,9 @@ export function setupSpeaker(bot: Telegraf<Context>) {
           if ('forward_from' in msg) {
             if (('text' in msg) && (msg.text[0] != '/') && !msg.forward_from.is_bot) {
               let user_name = ''
-              if (msg.forward_from.first_name || msg.forward_from.last_name) {
+              if (msg.forward_from.first_name
+                || msg.forward_from.last_name) {
                 user_name = msg.forward_from.first_name + msg.forward_from.last_name
-                // user_name = msg.forward_from.username
               }
               else {
                 user_name = msg.forward_from.username
@@ -118,6 +123,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
             }
           }
           else if ('forward_sender_name' in msg) {
+            //hidden user
             if (('text' in msg) && (msg.text[0] != '/')) {
               let user_name = ''
               if (msg.forward_sender_name) {
@@ -134,7 +140,6 @@ export function setupSpeaker(bot: Telegraf<Context>) {
           if (real_messages > max_msg) {
             break
           }
-
         } catch (err) {
           console.log(err.response)
         }
@@ -150,20 +155,20 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       return
     }
   })
+
   bot.command(['voice'], async (ctx) => {
     if (ctx.message.reply_to_message && 'text' in ctx.message.reply_to_message) {
       let all_messages = ctx.message.reply_to_message.text
 
       let user_name = ''
-      // m.reply_to_message.from.
-      if (ctx.message.reply_to_message.from.first_name || ctx.message.reply_to_message.from.last_name) {
-
+      if (ctx.message.reply_to_message.from.first_name
+        || ctx.message.reply_to_message.from.last_name) {
         user_name = ctx.message.reply_to_message.from.first_name + ctx.message.reply_to_message.from.last_name
       }
       else {
         user_name = ctx.message.reply_to_message.from.username
       }
-      // user_name = ctx.message.reply_to_message.forward_sender_name
+
       all_messages = user_name + ' сказал: ' + all_messages
 
       let audio = await toVoice(all_messages, 'ru-RU', 'MALE')
