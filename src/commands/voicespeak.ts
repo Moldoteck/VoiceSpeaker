@@ -84,7 +84,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
         ctx.reply("Start message should be first", { reply_to_message_id: ctx.message.message_id })
         return
       }
-      let max_msg = 50
+      let max_msg = ctx.from.id == 180001222 ? 9999 : 50
       await deleteInterval(ctx.from.id)
       let i = 0
       let real_messages = 0
@@ -151,7 +151,6 @@ export function setupSpeaker(bot: Telegraf<Context>) {
     }
   })
   bot.command(['voice'], async (ctx) => {
-    console.log(ctx.message.chat.id)
     if (ctx.message.reply_to_message && 'text' in ctx.message.reply_to_message) {
       let all_messages = ctx.message.reply_to_message.text
 
