@@ -11,8 +11,8 @@ function mergeAudios(audios) {
   var reader = new streams.ReadableStream();
   var writer = new streams.WritableStream();
   audios.forEach(element => {
-    if (element instanceof streams.ReadableStream) {
-      element.pipe(writer)
+    if (false&&element instanceof streams.ReadableStream) {
+      element.pipe(writer)//maybe read function
     }
     else {
       writer.write(element)
@@ -26,8 +26,9 @@ export async function toVoice(text: string, language = 'ru-RU', gender = 'NEUTRA
   const client = new textToSpeech.TextToSpeechClient();
   const request = {
     input: { ssml: `<speak>${text}<break time=\"${pause}s\"/></speak>` },
+    // , name: `${language}-Wavenet-A`
     voice: { languageCode: language, ssmlGender: gender },
-    audioConfig: { audioEncoding: 'OGG_OPUS' },
+    audioConfig: { audioEncoding: 'MP3' },
   };
 
   let [response] = await client.synthesizeSpeech(request)
@@ -40,9 +41,12 @@ function isRussian(value: string) {
   return cyrillicPattern.test(value)
 }
 
-async function voicify(messages) {
+async function voicify(messages, lang) {
   let all_audios = []
   let voice_types = ['MALE', 'FEMALE']
+  if (lang == 'ro-RO') {
+    voice_types = ['NEUTRAL', 'NEUTRAL']
+  }
   let voice_index = 0
 
   let i = 0
@@ -50,12 +54,12 @@ async function voicify(messages) {
     let element = messages[i]
     if (true) {
       // if (isRussian(element[0])) {
-      let mssg = await toVoice(element.join(''), 'ru-RU', voice_types[voice_index])
+      let mssg = await toVoice(element.join(''), lang, voice_types[voice_index])
       all_audios.push(mssg)
     }
     else {
       let mssg1 = await toVoice(element[0], 'en-US', voice_types[voice_index])
-      let mssg2 = await toVoice(element[1], 'ru-RU', voice_types[voice_index])
+      let mssg2 = await toVoice(element[1], lang, voice_types[voice_index])
       all_audios.push(mssg1)
       all_audios.push(mssg2)
     }
@@ -117,7 +121,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
                 messages[messages.length - 1][1] += `.<break time=\"${pause}s\"/> ` + msg.text
               }
               else {
-                messages.push([user_name, ' сказал: ' + msg.text])
+                messages.push([user_name, ` ${ctx.i18n.t('said')}: ` + msg.text])
               }
               prev_id = msg.forward_from.id
             }
@@ -130,7 +134,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
                 user_name = msg.forward_sender_name
               }
               real_messages += 1
-              messages.push([user_name, ' сказал: ' + msg.text])
+              messages.push([user_name, ` ${ctx.i18n.t('said')}: ` + msg.text])
               prev_id = -1
             }
             replyMethodDeprecated()
@@ -144,7 +148,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
           console.log(err.response)
         }
       }
-      let all_audios = await voicify(messages)
+      let all_audios = await voicify(messages, languages[ctx.i18n.t('name')])
       let audio = mergeAudios(all_audios)
 
       ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
@@ -169,9 +173,10 @@ export function setupSpeaker(bot: Telegraf<Context>) {
         user_name = ctx.message.reply_to_message.from.username
       }
 
-      all_messages = user_name + ' сказал: ' + all_messages
+      all_messages = user_name + ` ${ctx.i18n.t('said')}: ` + all_messages
+      console.log(languages[ctx.i18n.t('name')])
+      let audio = await toVoice(all_messages, languages[ctx.i18n.t('name')], 'NEUTRAL')
 
-      let audio = await toVoice(all_messages, 'ru-RU', 'MALE')
       ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
       // ctx.deleteMessage(ctx.message.message_id)
     }
@@ -182,6 +187,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
   })
 }
 
+let languages = { 'English': 'en-US', 'Русский': 'ru-RU', 'Romana': 'ro-RO' }
 
 function replyMethodDeprecated() {
   // else {

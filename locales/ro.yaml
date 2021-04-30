@@ -1,0 +1,6 @@
+name: Romana
+help: |
+  <b>Bot-ul</b> poate transforma o conversatie intr-un mesaj vocal. Raspunde cu /vs pentru primul mesaj din interval. Raspunde cu /ve pentru ultimul mesaj din interval. Raspunde cu /voice pentru mesajul curent
+language: Te rog, alege limba.
+language_selected: <b>Bot-ul</b> acum vorbeste in Romana.
+said: a zis
