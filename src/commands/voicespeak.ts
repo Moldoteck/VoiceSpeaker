@@ -167,7 +167,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       let user_name = ''
       if (ctx.message.reply_to_message.from.first_name
         || ctx.message.reply_to_message.from.last_name) {
-        user_name = ctx.message.reply_to_message.from.first_name + ctx.message.reply_to_message.from.last_name
+        user_name = ctx.message.reply_to_message.from.first_name// + ctx.message.reply_to_message.from.last_name
       }
       else {
         user_name = ctx.message.reply_to_message.from.username
