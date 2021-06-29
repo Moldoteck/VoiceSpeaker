@@ -109,7 +109,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
               let user_name = ''
               if (msg.forward_from.first_name
                 || msg.forward_from.last_name) {
-                user_name = msg.forward_from.first_name + msg.forward_from.last_name
+                user_name = msg.forward_from.first_name// + msg.forward_from.last_name
               }
               else {
                 user_name = msg.forward_from.username
