@@ -189,9 +189,9 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       readertmp.append(audio)
 
       var command = ffmpeg(readertmp).audioCodec('libmp3lame')
-      .on('error', function(err) {
+      .on('error', function(err, stdout, stderr) {
         console.log('An error occurred: ' + err.message);
-      }).pipe(writer, { end: true })
+      }).pipe(writer, { end: true }).format('mp3')
       // command.run()
       // var command = ffmpeg(readertmp)
       // let soxed = readertmp.pipe(sox({ input: { type: 'mp3' }, output: { type: 'opus' } }))
