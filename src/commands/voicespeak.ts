@@ -110,8 +110,8 @@ export function setupSpeaker(bot: Telegraf<Context>) {
           if ('forward_from' in msg) {
             if (('text' in msg) && (msg.text[0] != '/') && !msg.forward_from.is_bot) {
               let user_name = ''
-              if (msg.forward_from.first_name
-                || msg.forward_from.last_name) {
+              if (false && (msg.forward_from.first_name
+                || msg.forward_from.last_name)) {
                 user_name = msg.forward_from.first_name// + msg.forward_from.last_name
               }
               else {
@@ -186,8 +186,8 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       let all_messages = ctx.message.reply_to_message.text
 
       let user_name = ''
-      if (ctx.message.reply_to_message.from.first_name
-        || ctx.message.reply_to_message.from.last_name) {
+      if (false&&(ctx.message.reply_to_message.from.first_name
+        || ctx.message.reply_to_message.from.last_name)) {
         user_name = ctx.message.reply_to_message.from.first_name// + ctx.message.reply_to_message.from.last_name
       }
       else {
