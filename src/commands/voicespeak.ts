@@ -182,17 +182,17 @@ export function setupSpeaker(bot: Telegraf<Context>) {
 
       let readertmp = new streams.ReadableStream()
       readertmp.append(audio)
-      // var command = SoxCommand();
-      // command.input(readertmp)
-      //   .inputFileType('raw');
+      var command = SoxCommand();
+      command.input(readertmp)
+        // .inputFileType('raw');
 
-      // let reader = new streams.ReadableStream()
-      // let writer = new streams.WritableStream()
-      // command.output(writer)
+      let reader = new streams.ReadableStream()
+      let writer = new streams.WritableStream()
+      command.output(writer)
       //   .outputFileType('ogg');
 
       // // console.log(writer.toBuffer())
-      // reader.append(writer.toBuffer())
+      reader.append(writer.toBuffer())
 
       ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
       ctx.replyWithVoice({ source: readertmp }, { reply_to_message_id: ctx.message.message_id })
