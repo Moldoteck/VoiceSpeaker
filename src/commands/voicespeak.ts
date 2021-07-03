@@ -6,12 +6,13 @@ process.env.GOOGLE_APPLICATION_CREDENTIALS = tokenPath;
 const fs = require('fs');
 const util = require('util');
 var streams = require('memory-streams');
+var SoxCommand = require('sox-audio');
 
 function mergeAudios(audios) {
   var reader = new streams.ReadableStream();
   var writer = new streams.WritableStream();
   audios.forEach(element => {
-    if (false&&element instanceof streams.ReadableStream) {
+    if (false && element instanceof streams.ReadableStream) {
       element.pipe(writer)//maybe read function
     }
     else {
@@ -21,6 +22,8 @@ function mergeAudios(audios) {
   reader.append(writer.toBuffer())
   return reader
 }
+
+
 
 export async function toVoice(text: string, language = 'ru-RU', gender = 'NEUTRAL', pause = 0) {
   const client = new textToSpeech.TextToSpeechClient();
@@ -177,7 +180,16 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       console.log(languages[ctx.i18n.t('name')])
       let audio = await toVoice(all_messages, languages[ctx.i18n.t('name')], 'NEUTRAL')
 
-      ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
+      var command = SoxCommand(audio);
+
+      let reader = new streams.ReadableStream()
+      let writer = new streams.WritableStream()
+      command.output(writer)
+        .outputFileType('ogg');
+        
+      reader.append(writer.toBuffer())
+
+      ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
       // ctx.deleteMessage(ctx.message.message_id)
     }
     else {
