@@ -110,9 +110,10 @@ export function setupSpeaker(bot: Telegraf<Context>) {
           if ('forward_from' in msg) {
             if (('text' in msg) && (msg.text[0] != '/') && !msg.forward_from.is_bot) {
               let user_name = ''
-              if (false && (msg.forward_from.first_name
-                || msg.forward_from.last_name)) {
-                user_name = msg.forward_from.first_name// + msg.forward_from.last_name
+              if (false ) {
+                //(msg.forward_from.first_name
+                // || msg.forward_from.last_name)
+                // user_name = msg.forward_from.first_name// + msg.forward_from.last_name
               }
               else {
                 user_name = msg.forward_from.username
