@@ -182,15 +182,15 @@ export function setupSpeaker(bot: Telegraf<Context>) {
 
       let readertmp = new streams.ReadableStream()
       readertmp.append(audio)
-      var command = SoxCommand(readertmp);
-      // command.input(readertmp)
-        // .inputFileType('raw');
+      var command = SoxCommand();
+      command.input(readertmp)
+        .inputFileType('raw');
 
       let reader = new streams.ReadableStream()
       let writer = new streams.WritableStream()
       command.output(writer)
       command.run()
-        // .outputFileType('ogg');
+        .outputFileType('ogg');
 
 
       // // console.log(writer.toBuffer())
