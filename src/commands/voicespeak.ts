@@ -189,19 +189,22 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       readertmp.append(audio)
 
       var command = ffmpeg(readertmp).format('mp3')
-      .on('error', function(err, stdout, stderr) {
-        console.log('An error occurred: ' + err.message);
-      }).output(writer, { end: true }).format('mp3')
+        .on('error', function (err, stdout, stderr) {
+          console.log('An error occurred: ' + err.message);
+        }).on('end', function (stdout, stderr) {
+          console.log('Transcoding succeeded !');
+          reader.append(writer.toBuffer())
+
+          ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
+        }).output(writer, { end: true }).format('mp3')
       command.run()
       // var command = ffmpeg(readertmp)
       // let soxed = readertmp.pipe(sox({ input: { type: 'mp3' }, output: { type: 'opus' } }))
-        // .pipe(writer)
+      // .pipe(writer)
 
       // soxed.on('finish', () => {
-        //extract the text out of the pdf
-        reader.append(writer.toBuffer())
+      //extract the text out of the pdf
 
-        ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
       // });
 
 
