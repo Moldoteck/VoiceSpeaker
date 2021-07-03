@@ -189,11 +189,15 @@ export function setupSpeaker(bot: Telegraf<Context>) {
 
       readertmp.append(audio)
 
-      let soxed = readertmp.pipe(sox({input: { type:'mp3' }, output: { type: 'ogg' } }))
-      writer.write(soxed.toBuffer())
-        // .pipe(writer)
+      let soxed = readertmp.pipe(sox({ input: { type: 'mp3' }, output: { type: 'ogg' } }))
+        .pipe(writer)
 
+      soxed.on('finish', () => {
+        //extract the text out of the pdf
+        reader.append(writer.toBuffer())
 
+        ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
+      });
 
 
       // var command = SoxCommand();
@@ -206,10 +210,8 @@ export function setupSpeaker(bot: Telegraf<Context>) {
 
 
       // // console.log(writer.toBuffer())
-      reader.append(writer.toBuffer())
 
       ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
-      ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
       // ctx.deleteMessage(ctx.message.message_id)
     }
     else {
