@@ -189,7 +189,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
 
       readertmp.append(audio)
 
-      readertmp.pipe(sox({input: { type:'raw' }, output: { type: 'ogg' } }))
+      readertmp.pipe(sox({input: { type:'mp3' }, output: { type: 'ogg' } }))
         .pipe(writer)
 
 
