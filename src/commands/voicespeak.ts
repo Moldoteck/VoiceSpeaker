@@ -180,8 +180,10 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       console.log(languages[ctx.i18n.t('name')])
       let audio = await toVoice(all_messages, languages[ctx.i18n.t('name')], 'NEUTRAL')
 
+      let readertmp = new streams.ReadableStream()
+      readertmp.append(audio)
       var command = SoxCommand();
-      command.input(audio)
+      command.input(readertmp)
         .inputFileType('raw');
 
       let reader = new streams.ReadableStream()
