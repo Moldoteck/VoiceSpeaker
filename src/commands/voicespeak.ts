@@ -154,25 +154,25 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       let all_audios = await voicify(messages, languages[ctx.i18n.t('name')])
       let audio = mergeAudios(all_audios)
 
-      let readertmp = new streams.ReadableStream()
-      let writertmp = new streams.WritableStream()
-      let reader = new streams.ReadableStream()
-      let writer = new streams.WritableStream()
-      // audio.pipe(writertmp, {end:true}).on('e')
-      writertmp.write(audio.read())
-      readertmp.append(writertmp.toBuffer())
+      // let readertmp = new streams.ReadableStream()
+      // let writertmp = new streams.WritableStream()
+      // let reader = new streams.ReadableStream()
+      // let writer = new streams.WritableStream()
+      // // audio.pipe(writertmp, {end:true}).on('e')
+      // writertmp.write(audio.read())
+      // readertmp.append(writertmp.toBuffer())
 
-      var command = ffmpeg(readertmp).format('mp3')
-        .on('error', function (err, stdout, stderr) {
-          console.log('An error occurred: ' + err.message);
-        }).on('end', function (stdout, stderr) {
-          console.log('Transcoding succeeded !');
-          reader.append(writer.toBuffer())
+      // var command = ffmpeg(readertmp).format('mp3')
+      //   .on('error', function (err, stdout, stderr) {
+      //     console.log('An error occurred: ' + err.message);
+      //   }).on('end', function (stdout, stderr) {
+      //     console.log('Transcoding succeeded !');
+      //     reader.append(writer.toBuffer())
 
-          ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
-        }).output(writer, { end: true }).format('opus')
-      command.run()
-      // ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
+      //     ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
+      //   }).output(writer, { end: true }).format('opus')
+      // command.run()
+      ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
       // ctx.deleteMessage(ctx.message.message_id)
     }
     else {
