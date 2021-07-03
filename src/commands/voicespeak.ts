@@ -194,6 +194,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       // console.log(writer.toBuffer())
       reader.append(writer.toBuffer())
 
+      ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
       ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
       // ctx.deleteMessage(ctx.message.message_id)
     }
