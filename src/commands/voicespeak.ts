@@ -189,6 +189,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       let reader = new streams.ReadableStream()
       let writer = new streams.WritableStream()
       command.output(writer)
+      command.run()
         // .outputFileType('ogg');
 
 
