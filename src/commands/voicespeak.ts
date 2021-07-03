@@ -182,7 +182,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
 
       var command = SoxCommand();
       command.input(audio)
-        .inputFileType('mp3');
+        .inputFileType('raw');
 
       let reader = new streams.ReadableStream()
       let writer = new streams.WritableStream()
