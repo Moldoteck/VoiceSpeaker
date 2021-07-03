@@ -6,8 +6,7 @@ process.env.GOOGLE_APPLICATION_CREDENTIALS = tokenPath;
 const fs = require('fs');
 const util = require('util');
 var streams = require('memory-streams');
-// var SoxCommand = require('sox-audio');
-var sox = require('sox-stream')
+var ffmpeg = require('fluent-ffmpeg')
 
 function mergeAudios(audios) {
   var reader = new streams.ReadableStream();
@@ -189,15 +188,18 @@ export function setupSpeaker(bot: Telegraf<Context>) {
 
       readertmp.append(audio)
 
-      let soxed = readertmp.pipe(sox({ input: { type: 'mp3' }, output: { type: 'opus' } }))
-        .pipe(writer)
+      var command = ffmpeg().input(readertmp).inputFormat('mp3').output(writer, { end:true }).audioCodec('libopus')
+      command.run()
+      // var command = ffmpeg(readertmp)
+      // let soxed = readertmp.pipe(sox({ input: { type: 'mp3' }, output: { type: 'opus' } }))
+        // .pipe(writer)
 
-      soxed.on('finish', () => {
+      // soxed.on('finish', () => {
         //extract the text out of the pdf
         reader.append(writer.toBuffer())
 
         ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
-      });
+      // });
 
 
       // var command = SoxCommand();
