@@ -188,7 +188,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
 
       readertmp.append(audio)
 
-      var command = ffmpeg(readertmp).output(writer)
+      var command = ffmpeg(readertmp).audioCodec('libmp3lame').output(writer)
       command.run()
       // var command = ffmpeg(readertmp)
       // let soxed = readertmp.pipe(sox({ input: { type: 'mp3' }, output: { type: 'opus' } }))
