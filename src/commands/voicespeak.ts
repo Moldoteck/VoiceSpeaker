@@ -196,7 +196,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
           reader.append(writer.toBuffer())
 
           ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
-        }).output(writer, { end: true }).format('mp3')
+        }).output(writer, { end: true }).format('opus')
       command.run()
       // var command = ffmpeg(readertmp)
       // let soxed = readertmp.pipe(sox({ input: { type: 'mp3' }, output: { type: 'opus' } }))
