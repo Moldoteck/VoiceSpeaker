@@ -154,7 +154,23 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       let all_audios = await voicify(messages, languages[ctx.i18n.t('name')])
       let audio = mergeAudios(all_audios)
 
-      ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
+      let readertmp = new streams.ReadableStream()
+      let reader = new streams.ReadableStream()
+      let writer = new streams.WritableStream()
+
+      readertmp.append(audio)
+
+      var command = ffmpeg(readertmp).format('mp3')
+        .on('error', function (err, stdout, stderr) {
+          console.log('An error occurred: ' + err.message);
+        }).on('end', function (stdout, stderr) {
+          console.log('Transcoding succeeded !');
+          reader.append(writer.toBuffer())
+
+          ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
+        }).output(writer, { end: true }).format('opus')
+      command.run()
+      // ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
       // ctx.deleteMessage(ctx.message.message_id)
     }
     else {
@@ -180,8 +196,6 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       console.log(languages[ctx.i18n.t('name')])
       let audio = await toVoice(all_messages, languages[ctx.i18n.t('name')], 'NEUTRAL')
 
-
-
       let readertmp = new streams.ReadableStream()
       let reader = new streams.ReadableStream()
       let writer = new streams.WritableStream()
@@ -198,29 +212,6 @@ export function setupSpeaker(bot: Telegraf<Context>) {
           ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
         }).output(writer, { end: true }).format('opus')
       command.run()
-      // var command = ffmpeg(readertmp)
-      // let soxed = readertmp.pipe(sox({ input: { type: 'mp3' }, output: { type: 'opus' } }))
-      // .pipe(writer)
-
-      // soxed.on('finish', () => {
-      //extract the text out of the pdf
-
-      // });
-
-
-      // var command = SoxCommand();
-      // command.input(readertmp)
-      //   .inputFileType('raw');
-
-      // command.output(writer)
-      // .outputFileType('ogg');
-      // command.run()
-
-
-      // // console.log(writer.toBuffer())
-
-      ctx.replyWithVoice({ source: audio }, { reply_to_message_id: ctx.message.message_id })
-      // ctx.deleteMessage(ctx.message.message_id)
     }
     else {
       ctx.reply("this command sould be used as reply", { reply_to_message_id: ctx.message.message_id })
