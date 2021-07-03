@@ -158,7 +158,8 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       let writertmp = new streams.WritableStream()
       let reader = new streams.ReadableStream()
       let writer = new streams.WritableStream()
-      writertmp.write(audio)
+      audio.pipe(writertmp, {end:true})
+      // writertmp.write(audio)
       readertmp.append(writertmp.toBuffer())
 
       var command = ffmpeg(readertmp).format('mp3')
