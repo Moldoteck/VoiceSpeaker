@@ -187,6 +187,7 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       command.output(writer)
         .outputFileType('ogg');
         
+      console.log(writer.toBuffer())
       reader.append(writer.toBuffer())
 
       ctx.replyWithVoice({ source: reader }, { reply_to_message_id: ctx.message.message_id })
