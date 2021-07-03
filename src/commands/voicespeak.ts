@@ -6,7 +6,8 @@ process.env.GOOGLE_APPLICATION_CREDENTIALS = tokenPath;
 const fs = require('fs');
 const util = require('util');
 var streams = require('memory-streams');
-var SoxCommand = require('sox-audio');
+// var SoxCommand = require('sox-audio');
+var sox = require('sox-stream')
 
 function mergeAudios(audios) {
   var reader = new streams.ReadableStream();
@@ -180,17 +181,27 @@ export function setupSpeaker(bot: Telegraf<Context>) {
       console.log(languages[ctx.i18n.t('name')])
       let audio = await toVoice(all_messages, languages[ctx.i18n.t('name')], 'NEUTRAL')
 
-      let readertmp = new streams.ReadableStream()
-      readertmp.append(audio)
-      var command = SoxCommand();
-      command.input(readertmp)
-        .inputFileType('raw');
 
+
+      let readertmp = new streams.ReadableStream()
       let reader = new streams.ReadableStream()
       let writer = new streams.WritableStream()
-      command.output(writer)
-      .outputFileType('ogg');
-      command.run()
+
+      readertmp.append(audio)
+
+      readertmp.pipe(sox({ output: { type: 'ogg' } }))
+        .pipe(writer)
+
+
+
+
+      // var command = SoxCommand();
+      // command.input(readertmp)
+      //   .inputFileType('raw');
+
+      // command.output(writer)
+      // .outputFileType('ogg');
+      // command.run()
 
 
       // // console.log(writer.toBuffer())
