@@ -1,5 +1,5 @@
 import { Context, Telegraf } from 'telegraf'
-import { setStart, getStart, deleteInterval } from '../models'
+import { setStart, getStart, deleteInterval, findAllChats } from '../models'
 let textToSpeech = require('@google-cloud/text-to-speech')
 const tokenPath = './google_api.json';
 process.env.GOOGLE_APPLICATION_CREDENTIALS = tokenPath;
@@ -182,6 +182,27 @@ export function setupSpeaker(bot: Telegraf<Context>) {
     }
   })
 
+  bot.command('countChats', async (ctx) => {
+    if (ctx.message.from.id == 180001222) {
+      let chats = await findAllChats()
+      let users_tot = 0
+      let chat_nr = 0
+      let users_pr = 0
+      for (let element of chats) {
+        console.log(element)
+        try {
+          users_tot += await ctx.telegram.getChatMembersCount(element.id)
+          chat_nr += 1
+        } catch (err) {
+          console.log(err)
+          users_pr += 1
+        }
+      }
+      ctx.reply('Total users ' + users_tot)
+      ctx.reply('Private Users ' + users_pr)
+      ctx.reply('Chats ' + chat_nr)
+    }
+  })
   bot.command(['voice'], async (ctx) => {
     if (ctx.message.reply_to_message && 'text' in ctx.message.reply_to_message) {
       let all_messages = ctx.message.reply_to_message.text

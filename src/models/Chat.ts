@@ -26,3 +26,7 @@ export async function findChat(id: number) {
   }
   return chat
 }
+
+export async function findAllChats() {
+  return await ChatModel.find({})
+}
